@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Headers,
   HttpCode,
@@ -34,5 +35,10 @@ export class PermissionController {
     @Body() updatePermissionDto: PermissionDto,
   ) {
     return this.permissionService.update(id, updatePermissionDto);
+  }
+
+  @Delete(':id')
+  async delete(@Param('id') id: string) {
+    return this.permissionService.delete(id);
   }
 }
