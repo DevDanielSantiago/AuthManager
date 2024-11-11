@@ -5,6 +5,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
+import { PermissionModule } from './permission/permission.module';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -19,6 +21,7 @@ import { AppService } from './app.service';
       }),
       inject: [ConfigService],
     }),
+    PermissionModule,
   ],
   controllers: [AppController],
   providers: [AppService],
