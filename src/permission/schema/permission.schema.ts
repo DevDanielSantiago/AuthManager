@@ -9,7 +9,7 @@ export class Permission extends Document {
   _id: string;
 
   @Prop({
-    type: String,
+    type: [String, 'Permission name is string'],
     required: [true, 'Permission name is required'],
     unique: true,
     trim: true,
@@ -19,7 +19,7 @@ export class Permission extends Document {
   name: string;
 
   @Prop({
-    type: String,
+    type: [String, 'Permission description is string'],
     required: [true, 'Description is required'],
     trim: true,
     minlength: [10, 'Description must be at least 10 characters long'],
