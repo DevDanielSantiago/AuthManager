@@ -15,19 +15,6 @@ import { PermissionRepository } from 'src/permission/repository/permission.repos
 export class PermissionService {
   constructor(private readonly permissionRepository: PermissionRepository) {}
 
-  async create(permission: PermissionDto): Promise<MessageResponseDto> {
-    const findPermission = await this.permissionRepository.findOne({
-      name: permission.name,
-      deletedAt: null,
-    });
-
-    if (findPermission)
-      throw new ConflictException('Permission already exists');
-
-    await this.permissionRepository.create(permission);
-    return { message: 'Permission created sucessfully' };
-  }
-
   async list(
     headers: HeadersPermissionDto,
   ): Promise<ListResponseDto<ResponsePermissionDto>> {
@@ -43,5 +30,18 @@ export class PermissionService {
     const count = await this.permissionRepository.count(filters);
 
     return { count, list };
+  }
+
+  async create(permission: PermissionDto): Promise<MessageResponseDto> {
+    const findPermission = await this.permissionRepository.findOne({
+      name: permission.name,
+      deletedAt: null,
+    });
+
+    if (findPermission)
+      throw new ConflictException('Permission already exists');
+
+    await this.permissionRepository.create(permission);
+    return { message: 'Permission created sucessfully' };
   }
 }
