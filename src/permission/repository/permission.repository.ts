@@ -30,11 +30,10 @@ export class PermissionRepository {
   }
 
   async delete(id: string) {
-    this.permissionModel.findByIdAndUpdate(
-      id,
-      { deletedAt: Date.now() },
-      { new: true, runValidators: true },
-    );
+    const options: QueryOptions = { new: true, runValidators: true };
+    return this.permissionModel
+      .findByIdAndUpdate(id, { deletedAt: new Date() }, options)
+      .exec();
   }
 
   async findOne(
