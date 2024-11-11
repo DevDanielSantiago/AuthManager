@@ -44,4 +44,21 @@ export class PermissionService {
     await this.permissionRepository.create(permission);
     return { message: 'Permission created sucessfully' };
   }
+
+  async update(
+    id: string,
+    permission: PermissionDto,
+  ): Promise<MessageResponseDto> {
+    const findPermission = await this.permissionRepository.findOne({
+      name: permission.name,
+      deletedAt: null,
+      _id: { $ne: id },
+    });
+
+    if (findPermission)
+      throw new ConflictException('Permission already exists');
+
+    await this.permissionRepository.update(id, permission);
+    return { message: 'Permission updated sucessfully' };
+  }
 }
