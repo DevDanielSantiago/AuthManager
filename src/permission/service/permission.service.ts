@@ -23,7 +23,7 @@ export class PermissionService {
 
     const filterName = headers['x-filter-name'];
 
-    const filters: Record<string, RegExp> = {};
+    const filters: Record<string, RegExp> = { deletedAt: null };
     if (filterName) filters['name'] = new RegExp(filterName, 'i');
 
     const list = await this.permissionRepository.find(filters, page, limit);
