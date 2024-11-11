@@ -5,6 +5,8 @@ import {
   Headers,
   HttpCode,
   HttpStatus,
+  Param,
+  Patch,
   Post,
 } from '@nestjs/common';
 
@@ -24,5 +26,13 @@ export class PermissionController {
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() createPermissionDto: PermissionDto) {
     return this.permissionService.create(createPermissionDto);
+  }
+
+  @Patch(':id')
+  async update(
+    @Param('id') id: string,
+    @Body() updatePermissionDto: PermissionDto,
+  ) {
+    return this.permissionService.update(id, updatePermissionDto);
   }
 }
