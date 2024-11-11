@@ -3,11 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, QueryOptions, RootFilterQuery } from 'mongoose';
 
 import { Permission } from 'src/permission/schema/permission.schema';
-import {
-  PermissionDto,
-  ResponsePermissionDto,
-  FilterItemsDto,
-} from 'src/permission/dto';
+import { PermissionDto, ResponsePermissionDto } from 'src/permission/dto';
 
 @Injectable()
 export class PermissionRepository {
@@ -43,12 +39,16 @@ export class PermissionRepository {
   }
 
   async find(
-    filter: FilterItemsDto,
+    filter: Record<string, RegExp>,
     page: number,
     limit: number,
   ): Promise<ResponsePermissionDto[]> {
     const skip = (page - 1) * limit;
-    return this.permissionModel.find(filter).skip(skip).limit(limit).exec();
+    return this.permissionModel
+      .find(filter, '-__v')
+      .skip(skip)
+      .limit(limit)
+      .exec();
   }
 
   async count(filter: Record<string, RegExp>): Promise<number> {
