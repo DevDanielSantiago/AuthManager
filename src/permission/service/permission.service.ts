@@ -12,6 +12,7 @@ export class PermissionService {
   async create(permission: PermissionDto): Promise<MessageResponseDto> {
     const findPermission = await this.permissionRepository.findOne({
       name: permission.name,
+      deletedAt: null,
     });
 
     if (findPermission)
