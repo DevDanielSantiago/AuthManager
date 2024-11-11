@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
-import { ConflictException } from 'src/exception';
+import { ConflictException, NotFoundException } from 'src/exception';
 
 import { ListResponseDto, MessageResponseDto } from 'src/dto';
 import {
@@ -60,5 +60,17 @@ export class PermissionService {
 
     await this.permissionRepository.update(id, permission);
     return { message: 'Permission updated sucessfully' };
+  }
+
+  async delete(id: string): Promise<MessageResponseDto> {
+    const findPermission = await this.permissionRepository.findOne({
+      _id: id,
+      deletedAt: null,
+    });
+
+    if (!findPermission) throw new NotFoundException('Permission not found');
+
+    await this.permissionRepository.delete(id);
+    return { message: 'Permission deleted sucessfully' };
   }
 }
