@@ -6,6 +6,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
 import { PermissionModule } from './permission/permission.module';
+import { RoleModule } from './role/role.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { PermissionModule } from './permission/permission.module';
       inject: [ConfigService],
     }),
     PermissionModule,
+    RoleModule,
   ],
   controllers: [AppController],
   providers: [AppService],
