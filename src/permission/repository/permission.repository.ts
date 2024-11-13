@@ -45,7 +45,7 @@ export class PermissionRepository {
   ): Promise<ResponsePermissionDto[]> {
     const skip = (page - 1) * limit;
     return this.permissionModel
-      .find(filter, '-__v')
+      .find(filter, '-__v -createdAt -updatedAt -deletedAt')
       .skip(skip)
       .limit(limit)
       .exec();
