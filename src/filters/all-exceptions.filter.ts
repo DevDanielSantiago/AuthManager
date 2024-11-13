@@ -6,6 +6,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { Response } from 'express';
+import { MongoError } from 'mongodb';
 import { Error } from 'mongoose';
 
 @Catch()
@@ -29,6 +30,22 @@ export class AllExceptionsFilter implements ExceptionFilter {
       });
     }
 
+    if ((exception as any).code === 11000) {
+      const duplicateKeyError = exception as MongoError;
+      const keyPattern = duplicateKeyError['keyPattern'];
+      const keyValue = duplicateKeyError['keyValue'];
+
+      const errors = Object.keys(keyPattern).map((key) => ({
+        field: key,
+        message: `Duplicate value for field '${key}': '${keyValue[key]}'`,
+      }));
+
+      return response.status(HttpStatus.CONFLICT).json({
+        status: HttpStatus.CONFLICT,
+        message: 'Duplicate key error',
+        errors: errors,
+      });
+    }
     if (exception instanceof HttpException) {
       const status = exception.getStatus();
       const exceptionResponse = exception.getResponse();
