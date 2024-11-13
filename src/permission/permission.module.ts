@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
-import { Permission, PermissionSchema } from './schema/permission.schema';
 import { PermissionController } from './controller/permission.controller';
 import { PermissionService } from './service/permission.service';
+import { Permission, PermissionSchema } from './schema/permission.schema';
 import { PermissionRepository } from './repository/permission.repository';
 
 @Module({
@@ -14,5 +14,6 @@ import { PermissionRepository } from './repository/permission.repository';
   ],
   controllers: [PermissionController],
   providers: [PermissionService, PermissionRepository],
+  exports: [PermissionRepository],
 })
 export class PermissionModule {}
