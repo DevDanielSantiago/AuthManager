@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import bcrypt from 'bcrypt';
 
 import { UserRepository } from '../repository/user.repository';
 import {
@@ -42,6 +43,9 @@ export class UserService {
     });
     if (findUser)
       throw new ConflictException('Username or email already exists');
+
+    const salt = await bcrypt.genSalt(12);
+    user.password = await bcrypt.hash(user.password, salt);
 
     await this.userRepository.create(user);
     return { message: 'User created sucessfully' };
