@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
 
 import { UserRepository } from '../repository/user.repository';
-import { HeadersUserDto, ResponseUserDto } from '../dto';
-import { ListResponseDto } from 'src/dto';
+import { CreateUserDto, HeadersUserDto, ResponseUserDto } from '../dto';
+import { ListResponseDto, MessageResponseDto } from 'src/dto';
+import { ConflictException } from 'src/exception';
 
 @Injectable()
 export class UserService {
@@ -27,5 +28,17 @@ export class UserService {
     const count = await this.userRepository.count(filters);
 
     return { count, list };
+  }
+
+  async create(user: CreateUserDto): Promise<MessageResponseDto> {
+    const findUser = await this.userRepository.findOne({
+      deletedAt: null,
+      $or: [{ username: user.username, email: user.email }],
+    });
+    if (findUser)
+      throw new ConflictException('Username or email already exists');
+
+    await this.userRepository.create(user);
+    return { message: 'User created sucessfully' };
   }
 }
