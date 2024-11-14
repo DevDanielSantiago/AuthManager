@@ -33,10 +33,7 @@ export const EmailChangeRequestSchema =
 
 EmailChangeRequestSchema.pre('save', function (next) {
   const now = new Date();
-  const expiration = new Date(Date.now() + 3600 * 1000);
-
   if (!this.createdAt) this.createdAt = now;
-  if (!this.tokenExpiration) this.tokenExpiration = expiration;
 
   next();
 });
