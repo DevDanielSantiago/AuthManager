@@ -58,7 +58,7 @@ export class UserService {
 
     const findCodeName = await this.userRepository.findOne({
       deletedAt: null,
-      $or: [{ username: user.username }],
+      username: user.username,
       _id: { $ne: id },
     });
     if (findCodeName) throw new ConflictException('Codename already exists');
