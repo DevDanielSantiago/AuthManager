@@ -7,9 +7,10 @@ import {
   HeadersUserDto,
   ResponseUserDto,
   UpdateUserDto,
+  UpdateUserPasswordDto,
 } from '../dto';
 import { ListResponseDto, MessageResponseDto } from 'src/dto';
-import { ConflictException } from 'src/exception';
+import { BadRequestException, ConflictException } from 'src/exception';
 
 @Injectable()
 export class UserService {
@@ -64,5 +65,26 @@ export class UserService {
 
     await this.userRepository.update(id, user);
     return { message: 'User updated sucessfully' };
+  }
+
+  async updatePassword(
+    id: string,
+    user: UpdateUserPasswordDto,
+  ): Promise<MessageResponseDto> {
+    const findUser = await this.userRepository.findOne({ _id: id });
+    if (!findUser) throw new ConflictException("User doesn't exists");
+
+    const isPasswordValid = await bcrypt.compare(
+      user.currentPassword,
+      findUser.password,
+    );
+    if (!isPasswordValid)
+      throw new BadRequestException('Current password is incorrect');
+
+    const salt = await bcrypt.genSalt(12);
+    const hashedPassword = await bcrypt.hash(user.newPassword, salt);
+
+    await this.userRepository.update(id, { password: hashedPassword });
+    return { message: 'Password updated sucessfully' };
   }
 }

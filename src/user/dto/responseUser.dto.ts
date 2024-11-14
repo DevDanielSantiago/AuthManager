@@ -3,4 +3,5 @@ export interface ResponseUserDto {
   name: string;
   username: string;
   email: string;
+  password: string;
 }
