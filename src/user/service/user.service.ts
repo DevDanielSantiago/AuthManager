@@ -2,7 +2,11 @@ import { Injectable } from '@nestjs/common';
 import bcrypt from 'bcrypt';
 import { v4 as uuid } from 'uuid';
 
-import { UserRepository, EmailChangeRequestRepository } from '../repository';
+import {
+  UserRepository,
+  EmailChangeRequestRepository,
+  PasswordResetRequestRepository,
+} from '../repository';
 import {
   CreateUserDto,
   HeadersUserDto,
@@ -20,6 +24,7 @@ export class UserService {
   constructor(
     private readonly userRepository: UserRepository,
     private readonly emailChangeRequestRepository: EmailChangeRequestRepository,
+    private readonly passwordResetRequestRepository: PasswordResetRequestRepository,
     private readonly mailerService: MailerService,
   ) {}
 
@@ -126,5 +131,27 @@ export class UserService {
     });
 
     return { message: 'Request created sucessfully' };
+  }
+
+  async forgotPassword(email: string) {
+    const findEmail = await this.userRepository.findOne({ email });
+    if (!findEmail) throw new ConflictException("Email doesn't exists");
+
+    const resetToken = uuid();
+    const tokenExpiration = new Date(Date.now() + 3600 * 1000);
+
+    await this.passwordResetRequestRepository.create({
+      userId: findEmail._id,
+      resetToken,
+      tokenExpiration,
+    });
+
+    await this.mailerService.sendMail({
+      to: findEmail.email,
+      subject: 'Recuperação de senha',
+      text: `ID de recuperação: ${findEmail._id}`,
+    });
+
+    return { message: 'E-mail sended sucessfully' };
   }
 }
