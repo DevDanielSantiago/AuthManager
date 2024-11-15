@@ -6,3 +6,5 @@ export * from './updateUserPassword.dto';
 export * from './updateUserEmail.dto';
 export * from './responseEmailChangeRequest.dto';
 export * from './emailChangeRequest.dto';
+export * from './passwordResetRequest.dto';
+export * from './responsePasswordResetRequest.dto';
