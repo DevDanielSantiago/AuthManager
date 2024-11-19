@@ -16,4 +16,8 @@ export class EmailChangeRequestDto {
   @IsDate()
   @IsNotEmpty()
   tokenExpiration: Date;
+
+  @IsString()
+  @IsNotEmpty()
+  clientIp: string;
 }

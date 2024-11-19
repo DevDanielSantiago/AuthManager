@@ -4,5 +4,6 @@ export interface ResponseEmailChangeRequestDto {
   newEmail: string;
   token: string;
   tokenExpiration: Date;
+  clientIp: string;
   createdAt: Date;
 }
