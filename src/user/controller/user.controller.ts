@@ -8,14 +8,17 @@ import {
   Param,
   Patch,
   Post,
+  Req,
 } from '@nestjs/common';
-import { UserService } from '../service/user.service';
+import { UserService } from '../service';
 import {
   CreateUserDto,
   HeadersUserDto,
   UpdateUserDto,
+  UpdateUserEmailDto,
   UpdateUserPasswordDto,
 } from '../dto';
+import { ClientInfoDto } from 'src/dto';
 
 @Controller('user')
 export class UserController {
@@ -43,5 +46,14 @@ export class UserController {
     @Body() updateUserPasswordDto: UpdateUserPasswordDto,
   ) {
     return this.userService.updatePassword(id, updateUserPasswordDto);
+  }
+
+  @Patch('email/:userId')
+  async updateEmail(
+    @Param('userId') id: string,
+    @Body() updateUserEmailDto: UpdateUserEmailDto,
+    @Req() clientInfo: ClientInfoDto,
+  ) {
+    return this.userService.updateEmail(id, updateUserEmailDto, clientInfo);
   }
 }
