@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { DeleteResult, Model, RootFilterQuery } from 'mongoose';
+import { Model, QueryOptions, RootFilterQuery, UpdateQuery } from 'mongoose';
 
 import { EmailChangeRequest } from 'src/user/schema/EmailChangeRequest.schema';
 import {
@@ -20,10 +20,25 @@ export class EmailChangeRequestRepository {
     return Request.save();
   }
 
-  async delete(id: string): Promise<DeleteResult> {
-    return this.EmailChangeRequestModel.deleteOne({
-      _id: id,
-    }).exec();
+  async update(
+    id: string,
+    data: UpdateQuery<EmailChangeRequest>,
+  ): Promise<ResponseEmailChangeRequestDto | undefined> {
+    const options: QueryOptions = { new: true, runValidators: true };
+    return this.EmailChangeRequestModel.findByIdAndUpdate(
+      id,
+      data,
+      options,
+    ).exec();
+  }
+
+  async delete(id: string): Promise<ResponseEmailChangeRequestDto | undefined> {
+    const options: QueryOptions = { new: true, runValidators: true };
+    return this.EmailChangeRequestModel.findByIdAndUpdate(
+      id,
+      { deletedAt: new Date() },
+      options,
+    ).exec();
   }
 
   async findOne(
