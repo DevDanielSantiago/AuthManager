@@ -24,8 +24,20 @@ export class EmailChangeRequest extends Document {
   @Prop({ type: Date, required: true })
   tokenExpiration: Date;
 
+  @Prop({ type: String, required: true })
+  clientIp: string;
+
+  @Prop({ type: String, default: null })
+  blockIp?: string;
+
   @Prop({ type: Date, default: Date.now })
   createdAt: Date;
+
+  @Prop({ default: Date.now })
+  updatedAt: Date;
+
+  @Prop({ type: Date, default: null })
+  deletedAt?: Date;
 }
 
 export const EmailChangeRequestSchema =
@@ -33,7 +45,12 @@ export const EmailChangeRequestSchema =
 
 EmailChangeRequestSchema.pre('save', function (next) {
   const now = new Date();
+  this.updatedAt = now;
   if (!this.createdAt) this.createdAt = now;
 
   next();
+});
+
+EmailChangeRequestSchema.pre('findOneAndUpdate', function () {
+  this.set({ updatedAt: new Date() });
 });
