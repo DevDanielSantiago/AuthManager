@@ -24,7 +24,10 @@ export class User extends Document {
     trim: true,
     minlength: [5, 'User username must be at least 5 characters long'],
     maxLength: [20, 'User username cannot exceed 20 characters'],
-    match: /^[a-zA-Z0-9.]$/,
+    match: [
+      /^(?=(.*[a-zA-Z]){3,})[a-zA-Z0-9.]+$/,
+      'username most have contains letters, numbers or dot',
+    ],
   })
   username: string;
 
@@ -33,7 +36,10 @@ export class User extends Document {
     required: [true, 'User email is required'],
     unique: true,
     trim: true,
-    match: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+    match: [
+      /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+      "User email isn't a valid email",
+    ],
   })
   email: string;
 
