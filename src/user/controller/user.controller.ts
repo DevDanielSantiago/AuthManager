@@ -10,7 +10,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { UserService } from '../service/user.service';
-import { CreateUserDto, HeadersUserDto, UpdateUserDto } from '../dto';
+import {
+  CreateUserDto,
+  HeadersUserDto,
+  UpdateUserDto,
+  UpdateUserPasswordDto,
+} from '../dto';
 
 @Controller('user')
 export class UserController {
@@ -30,5 +35,13 @@ export class UserController {
   @Patch(':id')
   async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.userService.update(id, updateUserDto);
+  }
+
+  @Patch('password/:userId')
+  async updatePassword(
+    @Param('userId') id: string,
+    @Body() updateUserPasswordDto: UpdateUserPasswordDto,
+  ) {
+    return this.userService.updatePassword(id, updateUserPasswordDto);
   }
 }
