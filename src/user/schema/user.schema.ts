@@ -13,7 +13,7 @@ export class User extends Document {
     required: [true, 'User name is required'],
     trim: true,
     minlength: [3, 'User name must be at least 3 characters long'],
-    maxLength: [20, 'User name cannot exceed 20 characters'],
+    maxLength: [40, 'User name cannot exceed 40 characters'],
   })
   name: string;
 
