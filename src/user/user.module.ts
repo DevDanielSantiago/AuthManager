@@ -7,6 +7,7 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handleba
 import { join } from 'path';
 
 import { UserService } from './service/user.service';
+import { GeoLocationService } from './service/geolocation.service';
 import { UserController } from './controller/user.controller';
 
 import { User, UserSchema } from './schema/user.schema';
@@ -62,6 +63,7 @@ import {
   ],
   providers: [
     UserService,
+    GeoLocationService,
     UserRepository,
     EmailChangeRequestRepository,
     PasswordResetRequestRepository,
