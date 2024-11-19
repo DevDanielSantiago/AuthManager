@@ -5,10 +5,12 @@ import {
   Headers,
   HttpCode,
   HttpStatus,
+  Param,
+  Patch,
   Post,
 } from '@nestjs/common';
 import { UserService } from '../service/user.service';
-import { CreateUserDto, HeadersUserDto } from '../dto';
+import { CreateUserDto, HeadersUserDto, UpdateUserDto } from '../dto';
 
 @Controller('user')
 export class UserController {
@@ -23,5 +25,10 @@ export class UserController {
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() createUserDto: CreateUserDto) {
     return this.userService.create(createUserDto);
+  }
+
+  @Patch(':id')
+  async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+    return this.userService.update(id, updateUserDto);
   }
 }
