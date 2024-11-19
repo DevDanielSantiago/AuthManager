@@ -103,6 +103,7 @@ export class UserService {
   async updateEmail(
     id: string,
     user: UpdateUserEmailDto,
+    request: ClientInfoDto,
   ): Promise<MessageResponseDto> {
     const findUser = await this.userRepository.findOne({ _id: id });
     if (!findUser) throw new ConflictException("User doesn't exists");

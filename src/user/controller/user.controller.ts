@@ -52,8 +52,18 @@ export class UserController {
   async updateEmail(
     @Param('userId') id: string,
     @Body() updateUserEmailDto: UpdateUserEmailDto,
-    @Req() clientInfo: ClientInfoDto,
+    @Req() request: ClientInfoDto,
   ) {
-    return this.userService.updateEmail(id, updateUserEmailDto, clientInfo);
+    return this.userService.updateEmail(id, updateUserEmailDto, request);
+  }
+
+  @Patch('email/confirm/:token')
+  async confirmUpdateEmail(@Param('token') token: string) {
+    return this.userService.confirmUpdateEmail(token);
+  }
+
+  @Patch('email/ignore/:token')
+  async ignoreUpdateEmail(@Param('token') token: string) {
+    return this.userService.ignoreUpdateEmail(token);
   }
 }
