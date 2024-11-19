@@ -42,7 +42,6 @@ import {
         transport: {
           host: configService.get<string>('SMTP_HOST'),
           port: configService.get<number>('SMTP_PORT'),
-          secure: configService.get<boolean>('SMTP_SECURE'),
           auth: {
             user: configService.get<string>('SMTP_USER'),
             pass: configService.get<string>('SMTP_PASS'),
@@ -52,7 +51,7 @@ import {
           from: `"No Reply" <${configService.get<string>('SMTP_FROM')}>`,
         },
         template: {
-          dir: join(__dirname, 'mail/templates'),
+          dir: join(process.cwd(), 'src', 'mail', 'templates'),
           adapter: new HandlebarsAdapter(),
           options: {
             strict: true,
