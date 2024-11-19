@@ -40,11 +40,6 @@ export class User extends Document {
   @Prop({
     type: String,
     required: [true, 'User password is required'],
-    trim: true,
-    minlength: [8, 'User username must be at least 8 characters long'],
-    maxLength: [20, 'User username cannot exceed 20 characters'],
-    match:
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()])[A-Za-z\d!@#$%^&*()]$/,
   })
   password: string;
 
