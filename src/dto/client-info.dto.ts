@@ -1,4 +1,6 @@
 export type ClientInfoDto = {
-  clientIp: string;
-  userAgent: string;
+  clientInfo: {
+    clientIp: string;
+    userAgent: string;
+  };
 };
