@@ -1,0 +1,73 @@
+<html>
+  <head>
+    <meta charset='utf-8' />
+    <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+    <title>Confirmação de Alteração de Email</title>
+    <style>
+      body { font-family: Arial, sans-serif; line-height: 1.6; margin: 0;
+      padding: 0; background-color: #f4f4f4; } .container { max-width: 600px;
+      margin: 20px auto; padding: 20px; background-color: #ffffff;
+      border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); } .logo {
+      max-width: 150px; height: auto; } .content { padding: 20px 0; } .alert-box
+      { background-color: #fff3cd; border: 1px solid #ffeeba; color: #856404;
+      padding: 15px; border-radius: 4px; margin: 20px 0; } .button-container {
+      text-align: center; margin: 30px 0; } .button { display: inline-block;
+      padding: 12px 24px; text-decoration: none; border-radius: 4px;
+      font-weight: bold; margin: 0 10px; } .confirm-button { background-color:
+      #28a745; color: #ffffff; } .ignore-button { background-color: #dc3545;
+      color: #ffffff; } .details { background-color: #f8f9fa; padding: 15px;
+      border-radius: 4px; margin: 20px 0; } .footer { text-align: center;
+      padding-top: 20px; border-top: 2px solid #f0f0f0; color: #666666;
+      font-size: 12px; }
+    </style>
+  </head>
+  <body>
+    <div class='container'>
+      <div class='content'>
+        <p>Olá {{name}},</p>
+
+        <p>Recebemos uma solicitação para alterar o email associado à sua conta
+          de
+          <strong>{{currentEmail}}</strong>
+          para
+          <strong>{{newEmail}}</strong>.</p>
+
+        <div class='alert-box'>
+          <strong>Atenção!</strong>
+          Se você não solicitou esta alteração, por favor, ignore este email e
+          clique no botão "Ignorar" abaixo para nossa segurança.
+        </div>
+
+        <div class='details'>
+          <p><strong>Detalhes da solicitação:</strong></p>
+          <ul>
+            <li>Data da solicitação: {{requestDate}}</li>
+            <li>Novo email: {{newEmail}}</li>
+            {{#if device}}<li>Dispositivo: {{device}}</li>{{/if}}
+            {{#if location}}<li>Localização: {{location}}</li>{{/if}}
+          </ul>
+        </div>
+
+        <div class='button-container'>
+          <a href='{{confirmUrl}}' class='button confirm-button'>Confirmar
+            Alteração</a>
+          <a href='{{ignoreUrl}}' class='button ignore-button'>Ignorar</a>
+        </div>
+
+        <p>Este link de confirmação expirará em {{expirationTime}} horas.</p>
+
+        <p>Se você tiver alguma dúvida ou não reconhece esta atividade, entre em
+          contato com nossa equipe de suporte imediatamente.</p>
+
+        <p>Atenciosamente,<br />
+          Equipe
+          {{companyName}}</p>
+      </div>
+
+      <div class='footer'>
+        <p>© {{currentYear}} {{companyName}}. Todos os direitos reservados.</p>
+        <p>Este é um email automático. Por favor, não responda.</p>
+      </div>
+    </div>
+  </body>
+</html>
