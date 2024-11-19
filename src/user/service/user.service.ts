@@ -154,4 +154,43 @@ export class UserService {
 
     return { message: 'E-mail sended sucessfully' };
   }
+
+  async confirmUpdateEmail(token: string) {
+    const findRequest = await this.emailChangeRequestRepository.findOne({
+      token,
+      deletedAt: null,
+    });
+    if (!findRequest) throw new ConflictException("Token doesn't exists");
+
+    const inputDate = new Date(findRequest.tokenExpiration);
+    const now = new Date();
+
+    const diffInMilliseconds = now.getTime() - inputDate.getTime();
+    const diffInHours = diffInMilliseconds / (1000 * 60 * 60);
+
+    if (diffInHours > 1) throw new UnauthorizedException('Expired token');
+
+    await this.userRepository.update(findRequest.userId, {
+      email: findRequest.newEmail,
+    });
+
+    await this.emailChangeRequestRepository.delete(findRequest._id);
+
+    return { message: 'E-mail updated sucessfully' };
+  }
+
+  async ignoreUpdateEmail(token: string) {
+    const findRequest = await this.emailChangeRequestRepository.findOne({
+      token,
+      deletedAt: null,
+    });
+    if (!findRequest) throw new ConflictException("Token doesn't exists");
+
+    await this.emailChangeRequestRepository.update(findRequest._id, {
+      blockIp: findRequest.clientIp,
+      deletedAt: new Date(),
+    });
+
+    return { message: 'Client blocked sucessfully' };
+  }
 }
