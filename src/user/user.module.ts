@@ -1,10 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
-import { MailerModule } from '@nestjs-modules/mailer';
-
-import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
-import { join } from 'path';
 
 import { UserService } from './service/user.service';
 import { GeoLocationService } from './service/geolocation.service';
@@ -27,38 +22,16 @@ import {
   PasswordResetRequestSchema,
 } from './schema/passwordResetRequest.schema';
 
+import { MailerModule } from 'src/mailer/mailer.module';
+
 @Module({
   imports: [
-    ConfigModule,
     MongooseModule.forFeature([
       { name: User.name, schema: UserSchema },
       { name: EmailChangeRequest.name, schema: EmailChangeRequestSchema },
       { name: PasswordResetRequest.name, schema: PasswordResetRequestSchema },
     ]),
-    MailerModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => ({
-        transport: {
-          host: configService.get<string>('SMTP_HOST'),
-          port: configService.get<number>('SMTP_PORT'),
-          auth: {
-            user: configService.get<string>('SMTP_USER'),
-            pass: configService.get<string>('SMTP_PASS'),
-          },
-        },
-        defaults: {
-          from: `"No Reply" <${configService.get<string>('SMTP_FROM')}>`,
-        },
-        template: {
-          dir: join(process.cwd(), 'src', 'mail', 'templates'),
-          adapter: new HandlebarsAdapter(),
-          options: {
-            strict: true,
-          },
-        },
-      }),
-    }),
+    MailerModule,
   ],
   providers: [
     UserService,
