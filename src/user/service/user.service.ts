@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import bcrypt from 'bcrypt';
+import * as bcrypt from 'bcrypt';
 import { v4 as uuid } from 'uuid';
 
 import {
@@ -7,6 +7,7 @@ import {
   EmailChangeRequestRepository,
   PasswordResetRequestRepository,
 } from '../repository';
+import { GeoLocationService } from '.';
 import {
   CreateUserDto,
   HeadersUserDto,
@@ -15,9 +16,14 @@ import {
   UpdateUserEmailDto,
   UpdateUserPasswordDto,
 } from '../dto';
-import { ListResponseDto, MessageResponseDto } from 'src/dto';
-import { BadRequestException, ConflictException } from 'src/exception';
-import { MailerService } from '@nestjs-modules/mailer';
+import { ClientInfoDto, ListResponseDto, MessageResponseDto } from 'src/dto';
+import {
+  BadRequestException,
+  ConflictException,
+  UnauthorizedException,
+} from 'src/exception';
+
+import { MailerService } from 'src/mailer/service/mailer.service';
 
 @Injectable()
 export class UserService {
@@ -26,6 +32,7 @@ export class UserService {
     private readonly emailChangeRequestRepository: EmailChangeRequestRepository,
     private readonly passwordResetRequestRepository: PasswordResetRequestRepository,
     private readonly mailerService: MailerService,
+    private readonly geolocationService: GeoLocationService,
   ) {}
 
   async list(
@@ -102,33 +109,47 @@ export class UserService {
 
   async updateEmail(
     id: string,
-    user: UpdateUserEmailDto,
+    updateUser: UpdateUserEmailDto,
     request: ClientInfoDto,
   ): Promise<MessageResponseDto> {
     const findUser = await this.userRepository.findOne({ _id: id });
     if (!findUser) throw new ConflictException("User doesn't exists");
 
     const isPasswordValid = await bcrypt.compare(
-      user.password,
+      updateUser.password,
       findUser.password,
     );
     if (!isPasswordValid)
       throw new BadRequestException('Current password is incorrect');
 
+    const { clientIp, userAgent } = request.clientInfo;
+
+    const checkIpBlocked = await this.emailChangeRequestRepository.findOne({
+      userId: findUser._id,
+      blockIp: clientIp,
+    });
+    if (checkIpBlocked) throw new UnauthorizedException('Unauthorized request');
+
     const token = uuid();
     const tokenExpiration = new Date(Date.now() + 3600 * 1000);
 
-    const requestResult = await this.emailChangeRequestRepository.create({
+    await this.emailChangeRequestRepository.create({
       userId: id,
-      newEmail: user.email,
+      newEmail: updateUser.email,
       token,
       tokenExpiration,
+      clientIp: clientIp,
     });
 
-    await this.mailerService.sendMail({
-      to: findUser.email,
-      subject: 'Atualização de e-mail',
-      text: `ID de recuperação: ${requestResult._id}`,
+    const geoLocation = await this.geolocationService.getGeoLocation(clientIp);
+    const location = `${geoLocation.city} / ${geoLocation.region_name} - ${geoLocation.country_name}`;
+
+    await this.mailerService.sendUpdateEmailRequest({
+      currentUser: findUser,
+      updateUser: updateUser,
+      device: userAgent,
+      token: token,
+      location: geoLocation ? location : undefined,
     });
 
     return { message: 'Request created sucessfully' };
