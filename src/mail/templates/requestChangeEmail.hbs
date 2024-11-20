@@ -26,7 +26,7 @@
       <div class='content'>
         <p>Olá {{name}},</p>
 
-        <p>Recebemos uma solicitação para alterar o email associado à sua conta
+        <p>Recebemos uma solicitação para alterar o e-mail associado à sua conta
           de
           <strong>{{currentEmail}}</strong>
           para
@@ -34,17 +34,20 @@
 
         <div class='alert-box'>
           <strong>Atenção!</strong>
-          Se você não solicitou esta alteração, por favor, ignore este email e
-          clique no botão "Ignorar" abaixo para nossa segurança.
+          Se você não solicitou esta alteração, por favor, ignore este e-mail e
+          clique em "avise-nos" abaixo para sua segurança.
         </div>
 
         <div class='details'>
           <p><strong>Detalhes da solicitação:</strong></p>
           <ul>
-            <li>Data da solicitação: {{requestDate}}</li>
-            <li>Novo email: {{newEmail}}</li>
-            {{#if device}}<li>Dispositivo: {{device}}</li>{{/if}}
-            {{#if location}}<li>Localização: {{location}}</li>{{/if}}
+            <li><strong>Data da solicitação</strong>: {{requestDate}}</li>
+            <li><strong>E-mail atual</strong>: {{currentEmail}}</li>
+            <li><strong>Novo e-mail</strong>: {{newEmail}}</li>
+            {{#if device}}<li><strong>Dispositivo</strong>:
+                {{device}}</li>{{/if}}
+            {{#if location}}<li><strong>Localização</strong>:
+                {{location}}</li>{{/if}}
           </ul>
         </div>
 
@@ -56,7 +59,7 @@
         <p>Este link de confirmação expirará em {{expirationTime}} horas.</p>
 
         <p><strong>Não solicitou esta alteração?</strong><br />Se não solicitou
-          uma nova senha,
+          alteração de e-mail,
           <a href='{{ignoreUrl}}'>avise-nos</a>.</p>
 
         <p>Atenciosamente,<br />
@@ -66,7 +69,7 @@
 
       <div class='footer'>
         <p>© {{currentYear}} {{companyName}}. Todos os direitos reservados.</p>
-        <p>Este é um email automático. Por favor, não responda.</p>
+        <p>Este é um e-mail automático. Por favor, não responda.</p>
       </div>
     </div>
   </body>
