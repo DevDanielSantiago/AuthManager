@@ -8,6 +8,7 @@ import { AppService } from './app.service';
 import { PermissionModule } from './permission/permission.module';
 import { RoleModule } from './role/role.module';
 import { UserModule } from './user/user.module';
+import { MailerModule } from './mailer/mailer.module';
 import { ClientInfoMiddleware } from './middleware';
 
 @Module({
@@ -27,6 +28,7 @@ import { ClientInfoMiddleware } from './middleware';
     PermissionModule,
     RoleModule,
     UserModule,
+    MailerModule,
   ],
   controllers: [AppController],
   providers: [AppService],
