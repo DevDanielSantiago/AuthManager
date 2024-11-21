@@ -11,6 +11,7 @@ import { GeoLocationService } from '.';
 import {
   CreateUserDto,
   HeadersUserDto,
+  ResponseEmailChangeRequestDto,
   ResponseUserDto,
   UpdateUserDto,
   UpdateUserEmailDto,
@@ -35,6 +36,89 @@ export class UserService {
     private readonly geolocationService: GeoLocationService,
   ) {}
 
+  private async findAndValidateUserById(id: string): Promise<ResponseUserDto> {
+    const findUser = await this.userRepository.findOne({
+      _id: id,
+      deletedAt: null,
+    });
+    if (!findUser) throw new ConflictException("User doesn't exists");
+
+    return findUser;
+  }
+
+  private async validateUsernameAndEmail(username: string, email: string) {
+    const findUser = await this.userRepository.findOne({
+      deletedAt: null,
+      $or: [{ username: username, email: email }],
+    });
+    if (findUser)
+      throw new ConflictException('Username or email already exists');
+  }
+
+  private async validatePassword(password: string, encrypted: string) {
+    const isValid = await bcrypt.compare(password, encrypted);
+    if (!isValid)
+      throw new BadRequestException('Current password is incorrect');
+  }
+
+  private async validateClientIp(id: string, clientIp: string) {
+    const checkIpBlocked = await this.emailChangeRequestRepository.findOne({
+      userId: id,
+      blockIp: clientIp,
+    });
+    if (checkIpBlocked) throw new UnauthorizedException('Unauthorized request');
+  }
+
+  private async findAndvalidateToken(
+    token: string,
+  ): Promise<ResponseEmailChangeRequestDto> {
+    const findRequest = await this.emailChangeRequestRepository.findOne({
+      token,
+      deletedAt: null,
+    });
+    if (!findRequest) throw new ConflictException("Token doesn't exists");
+
+    return findRequest;
+  }
+
+  private async validateUsername(notId: string, username: string) {
+    const findUsername = await this.userRepository.findOne({
+      deletedAt: null,
+      username: username,
+      _id: { $ne: notId },
+    });
+    if (findUsername) throw new ConflictException('Username already exists');
+  }
+
+  private validateExpirationTime(expirationTime: Date) {
+    const inputDate = new Date(expirationTime);
+    const now = new Date();
+
+    const diffInMilliseconds = now.getTime() - inputDate.getTime();
+    const diffInHours = diffInMilliseconds / (1000 * 60 * 60);
+
+    if (diffInHours > 1) throw new UnauthorizedException('Expired token');
+  }
+
+  private generateTokenAndExpirationTime() {
+    const token = uuid();
+    const expirationTime = new Date(Date.now() + 60 * 60 * 1000);
+
+    return { token, expirationTime };
+  }
+
+  private async encryptPassword(password: string): Promise<string> {
+    const salt = await bcrypt.genSalt(12);
+    return bcrypt.hash(password, salt);
+  }
+
+  private async handleGeoLocation(clientIp: string) {
+    const geoLocation = await this.geolocationService.getGeoLocation(clientIp);
+
+    if (!geoLocation) return undefined;
+    return `${geoLocation.city} / ${geoLocation.region_name} - ${geoLocation.country_name}`;
+  }
+
   async list(
     headers: HeadersUserDto,
   ): Promise<ListResponseDto<ResponseUserDto>> {
@@ -57,30 +141,16 @@ export class UserService {
   }
 
   async create(user: CreateUserDto): Promise<MessageResponseDto> {
-    const findUser = await this.userRepository.findOne({
-      deletedAt: null,
-      $or: [{ username: user.username, email: user.email }],
-    });
-    if (findUser)
-      throw new ConflictException('Username or email already exists');
-
-    const salt = await bcrypt.genSalt(12);
-    user.password = await bcrypt.hash(user.password, salt);
+    await this.validateUsernameAndEmail(user.username, user.email);
+    user.password = await this.encryptPassword(user.password);
 
     await this.userRepository.create(user);
     return { message: 'User created sucessfully' };
   }
 
   async update(id: string, user: UpdateUserDto): Promise<MessageResponseDto> {
-    const findUser = await this.userRepository.findOne({ _id: id });
-    if (!findUser) throw new ConflictException("User doesn't exists");
-
-    const findCodeName = await this.userRepository.findOne({
-      deletedAt: null,
-      username: user.username,
-      _id: { $ne: id },
-    });
-    if (findCodeName) throw new ConflictException('Codename already exists');
+    await this.findAndValidateUserById(id);
+    await this.validateUsername(user.username, id);
 
     await this.userRepository.update(id, user);
     return { message: 'User updated sucessfully' };
@@ -88,20 +158,12 @@ export class UserService {
 
   async updatePassword(
     id: string,
-    user: UpdateUserPasswordDto,
+    updateUser: UpdateUserPasswordDto,
   ): Promise<MessageResponseDto> {
-    const findUser = await this.userRepository.findOne({ _id: id });
-    if (!findUser) throw new ConflictException("User doesn't exists");
+    const user = await this.findAndValidateUserById(id);
 
-    const isPasswordValid = await bcrypt.compare(
-      user.currentPassword,
-      findUser.password,
-    );
-    if (!isPasswordValid)
-      throw new BadRequestException('Current password is incorrect');
-
-    const salt = await bcrypt.genSalt(12);
-    const hashedPassword = await bcrypt.hash(user.newPassword, salt);
+    await this.validatePassword(updateUser.currentPassword, user.password);
+    const hashedPassword = await this.encryptPassword(updateUser.newPassword);
 
     await this.userRepository.update(id, { password: hashedPassword });
     return { message: 'Password updated sucessfully' };
@@ -112,44 +174,29 @@ export class UserService {
     updateUser: UpdateUserEmailDto,
     request: ClientInfoDto,
   ): Promise<MessageResponseDto> {
-    const findUser = await this.userRepository.findOne({ _id: id });
-    if (!findUser) throw new ConflictException("User doesn't exists");
-
-    const isPasswordValid = await bcrypt.compare(
-      updateUser.password,
-      findUser.password,
-    );
-    if (!isPasswordValid)
-      throw new BadRequestException('Current password is incorrect');
+    const user = await this.findAndValidateUserById(id);
+    await this.validatePassword(updateUser.password, user.password);
 
     const { clientIp, userAgent } = request.clientInfo;
+    await this.validateClientIp(user._id, clientIp);
 
-    const checkIpBlocked = await this.emailChangeRequestRepository.findOne({
-      userId: findUser._id,
-      blockIp: clientIp,
-    });
-    if (checkIpBlocked) throw new UnauthorizedException('Unauthorized request');
-
-    const token = uuid();
-    const tokenExpiration = new Date(Date.now() + 3600 * 1000);
+    const { token, expirationTime } = this.generateTokenAndExpirationTime();
 
     await this.emailChangeRequestRepository.create({
       userId: id,
       newEmail: updateUser.email,
-      token,
-      tokenExpiration,
+      token: token,
+      expirationTime: expirationTime,
       clientIp: clientIp,
     });
 
-    const geoLocation = await this.geolocationService.getGeoLocation(clientIp);
-    const location = `${geoLocation.city} / ${geoLocation.region_name} - ${geoLocation.country_name}`;
-
+    const location = await this.handleGeoLocation(clientIp);
     await this.mailerService.sendUpdateEmailRequest({
-      currentUser: findUser,
+      currentUser: user,
       updateUser: updateUser,
       device: userAgent,
       token: token,
-      location: geoLocation ? location : undefined,
+      location: location,
     });
 
     return { message: 'Request created sucessfully' };
@@ -159,13 +206,12 @@ export class UserService {
     const findEmail = await this.userRepository.findOne({ email });
     if (!findEmail) throw new ConflictException("Email doesn't exists");
 
-    const resetToken = uuid();
-    const tokenExpiration = new Date(Date.now() + 3600 * 1000);
+    const { token, expirationTime } = this.generateTokenAndExpirationTime();
 
     await this.passwordResetRequestRepository.create({
       userId: findEmail._id,
-      resetToken,
-      tokenExpiration,
+      token: token,
+      expirationTime: expirationTime,
     });
 
     await this.mailerService.sendMail({
@@ -178,38 +224,24 @@ export class UserService {
   }
 
   async confirmUpdateEmail(token: string) {
-    const findRequest = await this.emailChangeRequestRepository.findOne({
-      token,
-      deletedAt: null,
-    });
-    if (!findRequest) throw new ConflictException("Token doesn't exists");
+    const request = await this.findAndvalidateToken(token);
 
-    const inputDate = new Date(findRequest.tokenExpiration);
-    const now = new Date();
+    this.validateExpirationTime(request.expirationTime);
 
-    const diffInMilliseconds = now.getTime() - inputDate.getTime();
-    const diffInHours = diffInMilliseconds / (1000 * 60 * 60);
-
-    if (diffInHours > 1) throw new UnauthorizedException('Expired token');
-
-    await this.userRepository.update(findRequest.userId, {
-      email: findRequest.newEmail,
+    await this.userRepository.update(request.userId, {
+      email: request.newEmail,
     });
 
-    await this.emailChangeRequestRepository.delete(findRequest._id);
+    await this.emailChangeRequestRepository.delete(request._id);
 
     return { message: 'E-mail updated sucessfully' };
   }
 
   async ignoreUpdateEmail(token: string) {
-    const findRequest = await this.emailChangeRequestRepository.findOne({
-      token,
-      deletedAt: null,
-    });
-    if (!findRequest) throw new ConflictException("Token doesn't exists");
+    const request = await this.findAndvalidateToken(token);
 
-    await this.emailChangeRequestRepository.update(findRequest._id, {
-      blockIp: findRequest.clientIp,
+    await this.emailChangeRequestRepository.update(request._id, {
+      blockIp: request.clientIp,
       deletedAt: new Date(),
     });
 
