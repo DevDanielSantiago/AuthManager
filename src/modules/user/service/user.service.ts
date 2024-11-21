@@ -2,11 +2,7 @@ import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { v4 as uuid } from 'uuid';
 
-import {
-  UserRepository,
-  EmailChangeRequestRepository,
-  PasswordResetRequestRepository,
-} from '../repository';
+import { UserRepository, EmailChangeRequestRepository } from '../repository';
 import { GeoLocationService } from '.';
 import {
   CreateUserDto,
@@ -35,7 +31,6 @@ export class UserService {
   constructor(
     private readonly userRepository: UserRepository,
     private readonly emailChangeRequestRepository: EmailChangeRequestRepository,
-    private readonly passwordResetRequestRepository: PasswordResetRequestRepository,
     private readonly mailerService: MailerService,
     private readonly geolocationService: GeoLocationService,
   ) {}
