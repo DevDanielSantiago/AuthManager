@@ -5,11 +5,12 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
-import { PermissionModule } from './permission/permission.module';
-import { RoleModule } from './role/role.module';
-import { UserModule } from './user/user.module';
-import { MailerModule } from './mailer/mailer.module';
-import { ClientInfoMiddleware } from './middleware';
+import { PermissionModule } from './modules/permission/permission.module';
+import { RoleModule } from './modules/role/role.module';
+import { UserModule } from './modules/user/user.module';
+import { MailerModule } from './modules/mailer/mailer.module';
+
+import { ClientInfoMiddleware } from './common/middleware';
 
 @Module({
   imports: [
