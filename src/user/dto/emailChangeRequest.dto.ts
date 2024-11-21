@@ -15,7 +15,7 @@ export class EmailChangeRequestDto {
 
   @IsDate()
   @IsNotEmpty()
-  tokenExpiration: Date;
+  expirationTime: Date;
 
   @IsString()
   @IsNotEmpty()

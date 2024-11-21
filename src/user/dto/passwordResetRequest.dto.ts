@@ -7,9 +7,9 @@ export class PasswordResetRequestDto {
 
   @IsString()
   @IsNotEmpty()
-  resetToken: string;
+  token: string;
 
   @IsDate()
   @IsNotEmpty()
-  tokenExpiration: Date;
+  expirationTime: Date;
 }

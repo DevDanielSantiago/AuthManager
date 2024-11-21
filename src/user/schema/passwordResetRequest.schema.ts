@@ -11,10 +11,10 @@ export class PasswordResetRequest extends Document {
   userId: string;
 
   @Prop({ type: String, required: true, default: uuidv4 })
-  resetToken: string;
+  token: string;
 
   @Prop({ type: Date, required: true })
-  tokenExpiration: Date;
+  expirationTime: Date;
 
   @Prop({ type: Date, default: Date.now })
   createdAt: Date;

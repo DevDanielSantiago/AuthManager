@@ -22,7 +22,7 @@ export class EmailChangeRequest extends Document {
   token: string;
 
   @Prop({ type: Date, required: true })
-  tokenExpiration: Date;
+  expirationTime: Date;
 
   @Prop({ type: String, required: true })
   clientIp: string;
