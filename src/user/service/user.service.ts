@@ -202,27 +202,6 @@ export class UserService {
     return { message: 'Request created sucessfully' };
   }
 
-  async forgotPassword(email: string) {
-    const findEmail = await this.userRepository.findOne({ email });
-    if (!findEmail) throw new ConflictException("Email doesn't exists");
-
-    const { token, expirationTime } = this.generateTokenAndExpirationTime();
-
-    await this.passwordResetRequestRepository.create({
-      userId: findEmail._id,
-      token: token,
-      expirationTime: expirationTime,
-    });
-
-    await this.mailerService.sendMail({
-      to: findEmail.email,
-      subject: 'Recuperação de senha',
-      text: `ID de recuperação: ${findEmail._id}`,
-    });
-
-    return { message: 'E-mail sended sucessfully' };
-  }
-
   async confirmUpdateEmail(token: string) {
     const request = await this.findAndvalidateToken(token);
 
