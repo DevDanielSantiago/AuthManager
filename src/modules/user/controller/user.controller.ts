@@ -10,7 +10,7 @@ import {
   Post,
   Req,
 } from '@nestjs/common';
-import { UserService } from '../service';
+import { UserService } from '../service/user.service';
 import {
   CreateUserDto,
   HeadersUserDto,

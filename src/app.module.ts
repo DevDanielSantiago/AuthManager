@@ -5,6 +5,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
+import { GeolocationModule } from './modules/geolocation/geolocation.module';
 import { PermissionModule } from './modules/permission/permission.module';
 import { RoleModule } from './modules/role/role.module';
 import { UserModule } from './modules/user/user.module';
@@ -30,6 +31,7 @@ import { ClientInfoMiddleware } from './common/middleware';
     RoleModule,
     UserModule,
     MailerModule,
+    GeolocationModule,
   ],
   controllers: [AppController],
   providers: [AppService],

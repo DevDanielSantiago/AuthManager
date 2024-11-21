@@ -3,7 +3,6 @@ import * as bcrypt from 'bcrypt';
 import { v4 as uuid } from 'uuid';
 
 import { UserRepository, EmailChangeRequestRepository } from '../repository';
-import { GeoLocationService } from '.';
 import {
   CreateUserDto,
   HeadersUserDto,
@@ -25,6 +24,7 @@ import {
 } from 'src/common/exception';
 
 import { MailerService } from 'src/modules/mailer/service/mailer.service';
+import { GeolocationService } from 'src/modules/geolocation/service/geolocation.service';
 
 @Injectable()
 export class UserService {
@@ -32,7 +32,7 @@ export class UserService {
     private readonly userRepository: UserRepository,
     private readonly emailChangeRequestRepository: EmailChangeRequestRepository,
     private readonly mailerService: MailerService,
-    private readonly geolocationService: GeoLocationService,
+    private readonly geolocationService: GeolocationService,
   ) {}
 
   private async findAndValidateUserById(id: string): Promise<ResponseUserDto> {
@@ -111,12 +111,12 @@ export class UserService {
     return bcrypt.hash(password, salt);
   }
 
-  private async handleGeoLocation(clientIp: string) {
-    const geoLocation = await this.geolocationService.getGeoLocation(clientIp);
+  // private async handleGeoLocation(clientIp: string) {
+  //   const geoLocation = await this.geolocationService.getGeoLocation(clientIp);
 
-    if (!geoLocation) return undefined;
-    return `${geoLocation.city} / ${geoLocation.region_name} - ${geoLocation.country_name}`;
-  }
+  //   if (!geoLocation) return undefined;
+  //   return `${geoLocation.city} / ${geoLocation.region_name} - ${geoLocation.country_name}`;
+  // }
 
   async list(
     headers: HeadersUserDto,
@@ -189,7 +189,8 @@ export class UserService {
       clientIp: clientIp,
     });
 
-    const location = await this.handleGeoLocation(clientIp);
+    const location =
+      await this.geolocationService.handleLocation('143.137.95.246');
     await this.mailerService.sendUpdateEmailRequest({
       currentUser: user,
       updateUser: updateUser,
