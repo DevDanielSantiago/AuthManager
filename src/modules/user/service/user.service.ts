@@ -23,6 +23,7 @@ import {
   UnauthorizedException,
 } from 'src/common/exception';
 
+import { TransactionManager } from 'src/common/managers';
 import { MailerService } from 'src/modules/mailer/service/mailer.service';
 import { GeolocationService } from 'src/modules/geolocation/service/geolocation.service';
 
@@ -33,6 +34,7 @@ export class UserService {
     private readonly emailChangeRequestRepository: EmailChangeRequestRepository,
     private readonly mailerService: MailerService,
     private readonly geolocationService: GeolocationService,
+    private readonly transactionManager: TransactionManager,
   ) {}
 
   private async findAndValidateUserById(id: string): Promise<ResponseUserDto> {
@@ -174,21 +176,26 @@ export class UserService {
 
     const { token, expirationTime } = this.generateTokenAndExpirationTime();
 
-    await this.emailChangeRequestRepository.create({
-      userId: id,
-      newEmail: updateUser.email,
-      token: token,
-      expirationTime: expirationTime,
-      clientIp: clientIp,
-    });
+    await this.transactionManager.execute(async (session) => {
+      await this.emailChangeRequestRepository.create(
+        {
+          userId: id,
+          newEmail: updateUser.email,
+          token: token,
+          expirationTime: expirationTime,
+          clientIp: clientIp,
+        },
+        session,
+      );
 
-    const location = await this.geolocationService.handleLocation(clientIp);
-    await this.mailerService.sendUpdateEmailRequest({
-      currentUser: user,
-      updateUser: updateUser,
-      device: userAgent,
-      token: token,
-      location: location,
+      const location = await this.geolocationService.handleLocation(clientIp);
+      await this.mailerService.sendUpdateEmailRequest({
+        currentUser: user,
+        updateUser: updateUser,
+        device: userAgent,
+        token: token,
+        location: location,
+      });
     });
 
     return { message: 'Request created sucessfully' };

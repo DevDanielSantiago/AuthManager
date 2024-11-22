@@ -23,6 +23,7 @@ import {
 
 import { MailerModule } from 'src/modules/mailer/mailer.module';
 import { GeolocationModule } from 'src/modules/geolocation/geolocation.module';
+import { SharedModule } from '../shared/shared.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { GeolocationModule } from 'src/modules/geolocation/geolocation.module';
     ]),
     MailerModule,
     GeolocationModule,
+    SharedModule,
   ],
   providers: [
     UserService,

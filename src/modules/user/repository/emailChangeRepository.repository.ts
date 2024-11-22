@@ -1,6 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, QueryOptions, RootFilterQuery, UpdateQuery } from 'mongoose';
+import {
+  ClientSession,
+  Model,
+  QueryOptions,
+  RootFilterQuery,
+  UpdateQuery,
+} from 'mongoose';
 
 import { EmailChangeRequest } from 'src/modules/user/schema/EmailChangeRequest.schema';
 import {
@@ -15,9 +21,12 @@ export class EmailChangeRequestRepository {
     private readonly EmailChangeRequestModel: Model<EmailChangeRequest>,
   ) {}
 
-  async create(data: EmailChangeRequestDto): Promise<EmailChangeRequest> {
+  async create(
+    data: EmailChangeRequestDto,
+    session?: ClientSession,
+  ): Promise<EmailChangeRequest> {
     const Request = new this.EmailChangeRequestModel(data);
-    return Request.save();
+    return Request.save({ session });
   }
 
   async update(
