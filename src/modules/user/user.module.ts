@@ -41,5 +41,6 @@ import { GeolocationModule } from 'src/modules/geolocation/geolocation.module';
     PasswordResetRequestRepository,
   ],
   controllers: [UserController],
+  exports: [UserRepository],
 })
 export class UserModule {}
