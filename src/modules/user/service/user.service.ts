@@ -48,7 +48,7 @@ export class UserService {
   private async validateUsernameAndEmail(username: string, email: string) {
     const findUser = await this.userRepository.findOne({
       deletedAt: null,
-      $or: [{ username: username, email: email }],
+      $or: [{ username: username }, { email: email }],
     });
     if (findUser)
       throw new ConflictException('Username or email already exists');

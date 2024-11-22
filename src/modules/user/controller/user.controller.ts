@@ -23,6 +23,7 @@ import { ClientInfoDto } from 'src/common/dto';
 
 import { AuthGuard } from 'src/common/guards';
 import { Permissions } from 'src/common/decorators';
+import { RequestPayloadDTO } from 'src/common/dto/request-payload.tdo';
 
 @Controller('user')
 export class UserController {
@@ -43,30 +44,37 @@ export class UserController {
 
   @UseGuards(AuthGuard)
   @Permissions('user:self')
-  @Patch(':id')
-  async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(id, updateUserDto);
+  @Patch()
+  async update(
+    @Req() req: RequestPayloadDTO,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
+    return this.userService.update(req.user._id, updateUserDto);
   }
 
   @UseGuards(AuthGuard)
   @Permissions('user:self')
-  @Patch('password/:userId')
+  @Patch('password')
   async updatePassword(
-    @Param('userId') id: string,
+    @Req() req: RequestPayloadDTO,
     @Body() updateUserPasswordDto: UpdateUserPasswordDto,
   ) {
-    return this.userService.updatePassword(id, updateUserPasswordDto);
+    return this.userService.updatePassword(req.user._id, updateUserPasswordDto);
   }
 
   @UseGuards(AuthGuard)
   @Permissions('user:self')
-  @Patch('email/:userId')
+  @Patch('email')
   async updateEmail(
-    @Param('userId') id: string,
+    @Req() req: RequestPayloadDTO,
     @Body() updateUserEmailDto: UpdateUserEmailDto,
     @Req() request: ClientInfoDto,
   ) {
-    return this.userService.updateEmail(id, updateUserEmailDto, request);
+    return this.userService.updateEmail(
+      req.user._id,
+      updateUserEmailDto,
+      request,
+    );
   }
 
   @Patch('email/confirm/:token')
