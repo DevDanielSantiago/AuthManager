@@ -36,14 +36,15 @@ export class UserRepository {
     ).exec();
   }
 
-  async findOne(
+  async findOne<T = ResponseUserDto>(
     filterQuery: RootFilterQuery<User>,
     manipulateQuery?: QueryManipulator,
-  ): Promise<ResponseUserDto | undefined> {
+  ): Promise<T | undefined> {
     let query = this.UserModel.findOne(filterQuery);
     if (manipulateQuery) query = manipulateQuery(query);
 
-    return query.exec();
+    const result = await query.exec();
+    return result as unknown as T | undefined;
   }
 
   async find(

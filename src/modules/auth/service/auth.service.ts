@@ -6,6 +6,7 @@ import * as bcrypt from 'bcrypt';
 
 import { UserRepository } from 'src/modules/user/repository';
 import { LoginDto } from '../dto/login.dto';
+import { ResponseUserPermissionsDto } from 'src/modules/User/dto';
 
 @Injectable()
 export class AuthService {
@@ -15,14 +16,15 @@ export class AuthService {
   ) {}
 
   private async validateUsernameAndEmail(method: string) {
-    const findUser = await this.userRepository.findOne(
-      {
-        deletedAt: null,
-        $or: [{ email: method }, { username: method }],
-      },
-      (query) =>
-        query.populate({ path: 'role', populate: { path: 'permissions' } }),
-    );
+    const findUser =
+      await this.userRepository.findOne<ResponseUserPermissionsDto>(
+        {
+          deletedAt: null,
+          $or: [{ email: method }, { username: method }],
+        },
+        (query) =>
+          query.populate({ path: 'role', populate: { path: 'permissions' } }),
+      );
     if (!findUser) throw new ConflictException('Invalid credencials');
 
     return findUser;
@@ -34,7 +36,7 @@ export class AuthService {
   }
 
   async authentication(login: LoginDto) {
-    const user = (await this.validateUsernameAndEmail(login.method)) as any;
+    const user = await this.validateUsernameAndEmail(login.method);
 
     await this.validatePassword(login.password, user.password);
 
