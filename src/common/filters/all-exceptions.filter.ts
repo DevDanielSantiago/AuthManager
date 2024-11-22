@@ -5,6 +5,7 @@ import {
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
+import { JsonWebTokenError, TokenExpiredError } from '@nestjs/jwt';
 import { Response } from 'express';
 import { MongoError } from 'mongodb';
 import { Error } from 'mongoose';
@@ -14,6 +15,16 @@ export class AllExceptionsFilter implements ExceptionFilter {
   catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
+
+    if (
+      exception instanceof JsonWebTokenError ||
+      exception instanceof TokenExpiredError
+    ) {
+      return response.status(HttpStatus.FORBIDDEN).json({
+        status: HttpStatus.FORBIDDEN,
+        message: 'Access Denied',
+      });
+    }
 
     if (exception instanceof Error.ValidationError) {
       const formattedErrors = Object.values(exception.errors).map(
@@ -46,6 +57,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
         errors: errors,
       });
     }
+
     if (exception instanceof HttpException) {
       const status = exception.getStatus();
       const exceptionResponse = exception.getResponse();

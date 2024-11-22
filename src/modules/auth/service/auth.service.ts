@@ -1,12 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { BadRequestException, ConflictException } from 'src/common/exception';
-
 import * as bcrypt from 'bcrypt';
 
-import { UserRepository } from 'src/modules/user/repository';
-import { LoginDto } from '../dto/login.dto';
+import {
+  BadRequestException,
+  ConflictException,
+  ForbiddenException,
+} from 'src/common/exception';
+
+import { LoginDto, ValidateDto } from '../dto';
 import { ResponseUserPermissionsDto } from 'src/modules/User/dto';
+
+import { UserRepository } from 'src/modules/user/repository';
 
 @Injectable()
 export class AuthService {
@@ -52,5 +57,19 @@ export class AuthService {
     return {
       access_token: this.jwtService.sign(payload),
     };
+  }
+
+  async validate(validate: ValidateDto) {
+    const decoded = this.jwtService.verify(validate.token, {
+      secret: process.env.JWT_PUBLIC_KEY,
+    });
+
+    const hasPermission = validate.permissions.filter((permission) =>
+      decoded.permissions.includes(permission),
+    );
+
+    if (!hasPermission.length) throw new ForbiddenException('Access Denied');
+
+    return { authenticated: true };
   }
 }
