@@ -3,6 +3,8 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
 import { v4 as uuidv4 } from 'uuid';
 
+import { Role } from 'src/modules/role/schema/role.schema';
+
 @Schema()
 export class User extends Document {
   @Prop({ type: String, default: uuidv4 })
@@ -48,6 +50,12 @@ export class User extends Document {
     required: [true, 'User password is required'],
   })
   password: string;
+
+  @Prop({
+    type: String,
+    ref: 'Role',
+  })
+  role: Role;
 
   @Prop({ default: Date.now })
   createdAt: Date;

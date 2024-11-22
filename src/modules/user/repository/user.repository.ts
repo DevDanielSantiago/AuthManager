@@ -50,6 +50,10 @@ export class UserRepository {
       filter,
       '-password -__v -createdAt -updatedAt -deletedAt',
     )
+      .populate({
+        path: 'role',
+        select: '-permissions -__v -createdAt -updatedAt -deletedAt',
+      })
       .skip(skip)
       .limit(limit)
       .exec();

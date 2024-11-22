@@ -4,4 +4,8 @@ export interface ResponseUserDto {
   username: string;
   email: string;
   password: string;
+  role: {
+    _id: string;
+    name: string;
+  };
 }
