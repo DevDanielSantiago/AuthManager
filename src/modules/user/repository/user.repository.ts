@@ -1,9 +1,11 @@
+/* eslint-disable @typescript-eslint/no-empty-object-type */
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, QueryOptions, RootFilterQuery, UpdateQuery } from 'mongoose';
 
 import { User } from 'src/modules/user/schema/user.schema';
 import { CreateUserDto, ResponseUserDto } from 'src/modules/user/dto';
+import { QueryManipulator } from 'src/common/interfaces';
 
 @Injectable()
 export class UserRepository {
@@ -36,8 +38,12 @@ export class UserRepository {
 
   async findOne(
     filterQuery: RootFilterQuery<User>,
+    manipulateQuery?: QueryManipulator,
   ): Promise<ResponseUserDto | undefined> {
-    return this.UserModel.findOne(filterQuery).exec();
+    let query = this.UserModel.findOne(filterQuery);
+    if (manipulateQuery) query = manipulateQuery(query);
+
+    return query.exec();
   }
 
   async find(
