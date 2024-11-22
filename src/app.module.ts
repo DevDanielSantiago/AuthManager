@@ -12,6 +12,7 @@ import { UserModule } from './modules/user/user.module';
 import { MailerModule } from './modules/mailer/mailer.module';
 
 import { ClientInfoMiddleware } from './common/middleware';
+import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { ClientInfoMiddleware } from './common/middleware';
     PermissionModule,
     RoleModule,
     UserModule,
+    AuthModule,
     MailerModule,
     GeolocationModule,
   ],
