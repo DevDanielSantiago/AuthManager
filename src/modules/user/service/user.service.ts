@@ -111,13 +111,6 @@ export class UserService {
     return bcrypt.hash(password, salt);
   }
 
-  // private async handleGeoLocation(clientIp: string) {
-  //   const geoLocation = await this.geolocationService.getGeoLocation(clientIp);
-
-  //   if (!geoLocation) return undefined;
-  //   return `${geoLocation.city} / ${geoLocation.region_name} - ${geoLocation.country_name}`;
-  // }
-
   async list(
     headers: HeadersUserDto,
   ): Promise<ListResponseDto<ResponseUserDto>> {
@@ -189,8 +182,7 @@ export class UserService {
       clientIp: clientIp,
     });
 
-    const location =
-      await this.geolocationService.handleLocation('143.137.95.246');
+    const location = await this.geolocationService.handleLocation(clientIp);
     await this.mailerService.sendUpdateEmailRequest({
       currentUser: user,
       updateUser: updateUser,
