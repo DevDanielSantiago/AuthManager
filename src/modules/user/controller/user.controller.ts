@@ -21,14 +21,14 @@ import {
 } from '../dto';
 import { ClientInfoDto } from 'src/common/dto';
 
-import { JwtAuthGuard, PermissionsGuard } from 'src/common/guards';
+import { AuthGuard } from 'src/common/guards';
 import { Permissions } from 'src/common/decorators';
 
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @UseGuards(AuthGuard)
   @Permissions('user:list')
   @Get()
   async index(@Headers() headers: HeadersUserDto) {
@@ -41,11 +41,15 @@ export class UserController {
     return this.userService.create(createUserDto);
   }
 
+  @UseGuards(AuthGuard)
+  @Permissions('user:self')
   @Patch(':id')
   async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.userService.update(id, updateUserDto);
   }
 
+  @UseGuards(AuthGuard)
+  @Permissions('user:self')
   @Patch('password/:userId')
   async updatePassword(
     @Param('userId') id: string,
@@ -54,6 +58,8 @@ export class UserController {
     return this.userService.updatePassword(id, updateUserPasswordDto);
   }
 
+  @UseGuards(AuthGuard)
+  @Permissions('user:self')
   @Patch('email/:userId')
   async updateEmail(
     @Param('userId') id: string,
