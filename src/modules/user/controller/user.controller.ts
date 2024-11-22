@@ -9,6 +9,7 @@ import {
   Patch,
   Post,
   Req,
+  UseGuards,
 } from '@nestjs/common';
 import { UserService } from '../service/user.service';
 import {
@@ -20,10 +21,15 @@ import {
 } from '../dto';
 import { ClientInfoDto } from 'src/common/dto';
 
+import { JwtAuthGuard, PermissionsGuard } from 'src/common/guards';
+import { Permissions } from 'src/common/decorators';
+
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @Permissions('user:list')
   @Get()
   async index(@Headers() headers: HeadersUserDto) {
     return this.userService.list(headers);
